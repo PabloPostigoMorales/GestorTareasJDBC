@@ -1,6 +1,8 @@
 package org.example.domain;
 
-import javax.xml.transform.Result;
+import org.example.domain.tarea.Tarea;
+import org.example.domain.tarea.TareaAdapter;
+
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.logging.Logger;
@@ -31,26 +33,40 @@ public class DataBase {
         try(Statement st = connection.createStatement()){
             ResultSet rs= st.executeQuery("SELECT * FROM tarea");
             while (rs.next()){
-                System.out.println(rs.getInt("id"));
-                System.out.println(rs.getString("titulo"));
-                System.out.println(rs.getString("prioridad"));
-                System.out.println(rs.getInt("usuario_id"));
-                System.out.println(rs.getString("categoria"));
-                System.out.println(rs.getString("descripcion"));
-                String[] fila ={
-                        String.valueOf(rs.getInt("id")),
-                        rs.getString("titulo"),
-                        rs.getString("prioridad"),
-                        String.valueOf((rs.getInt("usuario_id"))),
-                        rs.getString("categoria"),
-                        rs.getString("descripcion")
-
-                };
+                String[] fila = convert(rs);
                 salida.add(fila);
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+
         return salida;
+    }
+    public static ArrayList<Tarea>getAllTarea(){
+        var salida = new ArrayList<Tarea>();
+        try(Statement st = connection.createStatement()){
+            ResultSet rs= st.executeQuery("SELECT * FROM tarea");
+            while (rs.next()){
+
+                salida.add(new TareaAdapter().loadFromResultSet(rs));
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+        return salida;
+    }
+
+    private static String[] convert(ResultSet rs) throws SQLException {
+        String[] fila ={
+                String.valueOf(rs.getInt("id")),
+                rs.getString("titulo"),
+                rs.getString("prioridad"),
+                String.valueOf((rs.getInt("usuario_id"))),
+                rs.getString("categoria"),
+                rs.getString("descripcion")
+
+        };
+        return fila;
     }
 }
